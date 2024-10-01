@@ -3,6 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 
+#takes in url of full judgement and get the text
 def url_to_file(url,case_id,output_dir):
     response = requests.get(url)
     if response.status_code == 200:
@@ -24,16 +25,13 @@ def url_to_file(url,case_id,output_dir):
             print("Content not found")
     else:
         print(f"Failed to retrieve the page. Status code: {response.status_code}")      
-#url = "https://www.elitigation.sg/gd/s/2015_SGHC_289"
-#url_to_file(url, "1.txt")
 
+# fetch all case links from a directory page
 def fetch_links(base_url):
-    # Function to fetch all case links from a directory page
     response = requests.get(base_url)
     if response.status_code == 200:
         soup = BeautifulSoup(response.content, 'html.parser')
         links = soup.find_all('a', class_='h5 gd-heardertext', href=True)
-        
         # Filter out the URLs that are relevant
         case_links = [urljoin(base_url, link['href']) for link in links]
         return case_links
@@ -41,15 +39,15 @@ def fetch_links(base_url):
         print(f"Failed to retrieve the page. Status code: {response.status_code}")
         return []
 
-
 def links_to_files(links, output_dir):
     for i in range(len(links)):
+        os.makedirs(output_dir, exist_ok=True)
         url_to_file(links[i],f"{links[i].split('/')[5]}",output_dir)
     print("scraping completed")
         
 url="https://www.elitigation.sg/gd/Home/Index?filter=SUPCT&yearOfDecision=All&sortBy=Score&currentPage=1&sortAscending=False&searchPhrase=tort&verbose=False"
 links=fetch_links(url)
-links_to_files(links, 'tort cases')
+links_to_files(links, 'Dataset')
 
 
 
